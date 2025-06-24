@@ -2,7 +2,7 @@
 
 ## Introduction ##
 
-Windows, in common with many other operating systems, supports "late binding" where some or most of the symbols in an executable program are resolved at runtime from other files in the system. On Windows these are known as "Dynamic-Link Libraries" and a brief overview can be found, for example, in &#91;Dynamic-Link Libraries&#93;. The Win32 system itself is accessed via entry points in (numerous) such dynamic link libraries (DLLs) and many applications are shipped as one or more executable programs (EXEs) and supporting DLLs.
+Windows, in common with many other operating systems, supports "late binding" where some or most of the symbols in an executable program are resolved at runtime from other files in the system. On Windows these are known as "Dynamic-Link Libraries" and a brief overview can be found, for example, in [Dynamic-Link Libraries](https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-libraries). The Win32 system itself is accessed via entry points in (numerous) such dynamic link libraries (DLLs) and many applications are shipped as one or more executable programs (EXEs) and supporting DLLs.
 
 While this approach provides a lot of benefits, likely already known to many of the readers of this article, it also adds an additional failure point in the running of the application.
 
@@ -17,7 +17,7 @@ There are three broad categories of failure when resolving a late binding symbol
 2. The symbol cannot be resolved against the DLL found
 3. There is a problem when loading the DLL into the process memory
 
-Additionally, there are two contexts where late binding occurs: one is when the system loader _implicitly_ resolves late binding symbols and the other is under program control when an application can request a DLL to be loaded into the running process and can attempt to resolve symbols in a loaded DLL. This is not a hard separation as these two contexts overlap, when for example an application requests a DLL that itself has late binding symbols or makes use of the Microsoft "delay loading" mechanism (See &#91;Linker support for delay-loading DLLs&#93;.)
+Additionally, there are two contexts where late binding occurs: one is when the system loader _implicitly_ resolves late binding symbols and the other is under program control when an application can request a DLL to be loaded into the running process and can attempt to resolve symbols in a loaded DLL. This is not a hard separation as these two contexts overlap, when for example an application requests a DLL that itself has late binding symbols or makes use of the Microsoft "delay loading" mechanism (See [Linker support for delay-loading DLLs](https://learn.microsoft.com/en-us/cpp/build/reference/linker-support-for-delay-loaded-dlls?view=msvc-170).)
 
 There are two main differences between these contexts. Firstly, in the former case any failure is fatal whereas in the latter case the program will receive an error code from the failed call and so some sort of recovery or remediation can be attempted. Secondly, the former case is in principle discoverable statically from the information in the headers of the executable and the DLLs whereas the second case requires an actual program execution as the behaviour is only evidenced at runtime.
 
@@ -42,7 +42,7 @@ The second example is when the DLL is found, but the required export is not pres
 
 ![MissingSymbol.png](images/MissingSymbol.png "Missing Symbol")
 
-This dialog gives us the so-called "decorated name" (also known as the "mangled name") of the symbol we are loading - see &#91;Decorated names&#93; for more details - but it does _not_ show the name of the DLL in which this symbol was expected to be found. Undecorating (or demangling) the name is easy (although it is probably not actually necessary in this case!) as fortunately we can copy and paste from the dialog using Ctrl+C / Ctrl+V and then run the `undname` program provided with Visual Studio to turn this symbol into the C++ symbol we are looking for:
+This dialog gives us the so-called "decorated name" (also known as the "mangled name") of the symbol we are loading - see [Decorated names](https://learn.microsoft.com/en-us/cpp/build/reference/decorated-names?view=msvc-170) for more details - but it does _not_ show the name of the DLL in which this symbol was expected to be found. Undecorating (or demangling) the name is easy (although it is probably not actually necessary in this case!) as fortunately we can copy and paste from the dialog using Ctrl+C / Ctrl+V and then run the `undname` program provided with Visual Studio to turn this symbol into the C++ symbol we are looking for:
 ```
 ---------------------------
 MissingSymbol.exe - Entry Point Not Found
@@ -77,9 +77,9 @@ Note that the error code in the dialog box, 0xc0000142, is defined as `STATUS_DL
 
 When one of the three errors occurs we can check things by hand to try and identify the root cause of the failure.
 
-We can look for a missing DLL by searching for the corresponding DLL filename and making sure that it can be found by the loader. However, working out exactly where the loader is going to look can be complex as there are numerous flags and options that change the actual path used by the system to locate DLLs. The full details are listed in &#91;Dynamic-link library search order&#93; which is not an easy read -- there are lots of factors to consider.
+We can look for a missing DLL by searching for the corresponding DLL filename and making sure that it can be found by the loader. However, working out exactly where the loader is going to look can be complex as there are numerous flags and options that change the actual path used by the system to locate DLLs. The full details are listed in [Dynamic-link library search order](https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order) which is not an easy read -- there are lots of factors to consider.
 
-Fortunately for many common cases it is enough if the target DLL is in the `system32` (64-bit programs) or `syswow64` (32-bit programs) directory underneath `%SystemRoot%` (typically `C:\Windows`), in the directory of the application executable, or somewhere along the `%PATH%`. (Note: the counterintuitive 64-bit directory name `system32` was retained for backwards compatibility with the original 32-bit Windows NT, even though it now contains 64-bit DLLs. In addition, for extra fun, Windows provides transparent file redirection from `system32` to `syswow64` for 32-bit programs: see &#91;File System Redirector&#93; for more on this. If you find this confusing you are not alone.)
+Fortunately for many common cases it is enough if the target DLL is in the `system32` (64-bit programs) or `syswow64` (32-bit programs) directory underneath `%SystemRoot%` (typically `C:\Windows`), in the directory of the application executable, or somewhere along the `%PATH%`. (Note: the counterintuitive 64-bit directory name `system32` was retained for backwards compatibility with the original 32-bit Windows NT, even though it now contains 64-bit DLLs. In addition, for extra fun, Windows provides transparent file redirection from `system32` to `syswow64` for 32-bit programs: see [File System Redirector](https://learn.microsoft.com/en-us/windows/win32/winprog64/file-system-redirector) for more on this. If you find this confusing you are not alone.)
 
 Looking for a missing symbol requires three things: the symbol being _requested_, the _name_ of the DLL expected to provide this symbol, and the list of symbols actually _exported_ from the target DLL. One way to obtain this information is by using the `dumpbin` program that comes with Visual Studio twice, once on the requesting binary and once on the target DLL. 
 
@@ -123,7 +123,7 @@ But surely there must be some better ways to do this than this sort of manual in
 
 ### What _not_ to use ###
 
-Many years ago Microsoft used to ship a GUI tool for viewing dependencies, `depends.exe`. This tool was later made freely available from its own website &#91;Dependency Walker&#93;. Unfortunately the website stopped updating at version 2.2 which reports under "What is New in Version 2.2" that it covers "... Updated internal information about known OS versions, build numbers, and flags up to the Vista RC1 build." (The tool's "About" page proudly reports that it was built on 29 Aug 2006!) Microsoft's web site recommends using this tool only on Windows 8 or before. Many people do still try to use this tool, but it has not stood the test of time very well. In particular, recent versions of Windows have added "API Set" functionality which is effectively a way to provide a platform-dependent virtual alias for a real DLL. These 'virtual DLLs' cause various problems for older tools that are completely unaware of their existence, like `depends`, and attempt to process them like normal DLL names.
+Many years ago Microsoft used to ship a GUI tool for viewing dependencies, `depends.exe`. This tool was later made freely available from its own website [Dependency Walker](https://www.dependencywalker.com/). Unfortunately the website stopped updating at version 2.2 which reports under "What is New in Version 2.2" that it covers "... Updated internal information about known OS versions, build numbers, and flags up to the Vista RC1 build." (The tool's "About" page proudly reports that it was built on 29 Aug 2006!) Microsoft's web site recommends using this tool only on Windows 8 or before. Many people do still try to use this tool, but it has not stood the test of time very well. In particular, recent versions of Windows have added "API Set" functionality which is effectively a way to provide a platform-dependent virtual alias for a real DLL. These 'virtual DLLs' cause various problems for older tools that are completely unaware of their existence, like `depends`, and attempt to process them like normal DLL names.
 
 For example, if I try to run depends.exe 2.2.6000 on Windows 11 to look at the dependencies for `DllNotFound.exe` there are two problems. Firstly it takes over eight minutes to run on my computer (with one thread being 100% busy) and secondly, while it does successfully report that the `MissingDll` is missing, it _also_ reports numerous false positives:
 
@@ -133,7 +133,7 @@ These two problems make it of rather limited use on current versions of Windows 
 
 ### A potentially better tool  ###
 
-One recommended tool with similar functionality is "Dependencies" available on GitHub at &#91;Dependencies&#93;. However the last commit was back in Nov 2021 so it does not appear to be being maintained any longer.
+One recommended tool with similar functionality is "Dependencies" available on GitHub at [Dependencies](https://github.com/lucasg/Dependencies). However the last commit was back in Nov 2021 so it does not appear to be being maintained any longer.
 
 It does at least _partly_ understand the newer API Set entries in the module headers, and so if I run this tool against `MissingSymbol.exe` it does quickly identify the missing symbol and the DLL containing it:
 
@@ -157,7 +157,7 @@ This setting goes by the name of "Show Loader Snaps". (I believe the "Snaps" in 
 
 ### Enabling "Show Loader Snaps" for a process ###
 
-The official way to use this is to use the `GFlags.exe` program that is part of &#91;Debugging Tools For Windows&#93; - I chose the route of simply asking for `Windows Driver Kit` as an Individual Component as part of my VS 2022 installation.
+The official way to use this is to use the `GFlags.exe` program that is part of [Debugging Tools For Windows](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/debugger-download-tools) - I chose the route of simply asking for `Windows Driver Kit` as an Individual Component as part of my VS 2022 installation.
 
 ![VS2022Install.png](images/VS2022Install.png "VS2022 Install")
 
@@ -213,7 +213,7 @@ An error 127 is reported from `GetProcAddress` for a symbol that is not found in
 
 The loader snap output goes to _any_ debugger so let us write one that is designed specifically for this task.
 
-We can make use of the debugger logic from "Using the Windows Debugging API" published in CVu March 2011 and also available as &#91;Simple Debugger&#93;. 
+We can make use of the debugger logic from "Using the Windows Debugging API" published in CVu March 2011 and also available as [Simple Debugger](../Simple_Debugger). 
 The two basic parts to writing a simple Windows debugger are:
 - Passing the flag `DEBUG_PROCESS` to the call to `CreateProcess`
 - Repeatedly calling the pair of functions `WaitForDebugEvent` and `ContinueDebugEvent` to obtain and handle successive debug events from the target process.
@@ -242,7 +242,7 @@ For the purposes of this article we provide a simple list of filters as member d
 
 As a first start, when we enable 'quiet' mode, we should filter out messages containing ` ENTER: `, ` RETURN: `, and ` INFO: `. This usually leaves us with warnings and errors, which for most DLL failures is often enough to solve the issue.
 
-The full source code for `ShowLoaderSnaps` is available on GitHub from &#91;Source Code&#93;.
+The full source code for `ShowLoaderSnaps` is available on GitHub from [Source Code](./SourceCode).
 
 For example, here is the complete output when running this program targetting `MissingSymbol.exe` (with show loader snaps enabled):
 
@@ -321,7 +321,7 @@ void UpdateImageConfigInformation(const std::string &filename) {
 }
 ```
 
-While in theory the same code should work in 64-bit mode .... it doesn't. There appears to be a problem in v64-bit mode with `GetImageConfigInformation`. I have raised a ticket with Microsoft to see if they could fix this (see &#91;Developer Support Ticket&#93;.)
+While in theory the same code should work in 64-bit mode .... it doesn't. There appears to be a problem in v64-bit mode with `GetImageConfigInformation`. I have raised a ticket with Microsoft to see if they could fix this (see [Developer Support Ticket 10890839]( https://developercommunity.visualstudio.com/t/GetImageConfigInformation-fails-on-x64-w/10890839).)
 
 However, we can still do the same thing ourselves, by manually walking the data structures. 
 - Starting with the `FileHeader` in the loaded image we cast it to the correct 32-bit or 64-bit `IMAGE_NT_HEADERS` structure.
@@ -338,7 +338,7 @@ We usually only want to set the loader snaps flag temporarily while we are inves
 
 We can resolve this easily, subject to using a couple of non, or partially, documented features, inside our `ShowLoaderSnaps` program itself.
 
-Firstly we need to use an undocumented field, `NtGlobalFlag`. The Show Loader Snaps flag ends up in the process' memory in the `NtGlobalFlag` structure which is in turn inside the `PEB` (Process Environment Block). While the Windows SDK does include _a_ definition for the `PEB` structure in `winternl.h` it is a simplified one with only a subset of the data available. See the official documentation at &#91;PEB structure&#93; and see that there are a dozen sections of the structure covered by various `Reserved` fields. We can use the PDB symbols for NtDll.dll (available from the Microsoft Symbol Servers) to get the offset in the process environment block of the global flag, which lies inside one of these reserved sections. For example, inside WinDbg:
+Firstly we need to use an undocumented field, `NtGlobalFlag`. The Show Loader Snaps flag ends up in the process' memory in the `NtGlobalFlag` structure which is in turn inside the `PEB` (Process Environment Block). While the Windows SDK does include _a_ definition for the `PEB` structure in `winternl.h` it is a simplified one with only a subset of the data available. See the official documentation at [PEB structure](https://learn.microsoft.com/en-us/windows/win32/api/winternl/ns-winternl-peb) and see that there are a dozen sections of the structure covered by various `Reserved` fields. We can use the PDB symbols for NtDll.dll (available from the Microsoft Symbol Servers) to get the offset in the process environment block of the global flag, which lies inside one of these reserved sections. For example, inside WinDbg:
 ```
 0:000> dt ntdll!_PEB NtGlobalFlag
    +0x0bc NtGlobalFlag : Uint4B
@@ -384,7 +384,7 @@ The failure to load a shared library is similar to the Windows case, except that
 
 The failure to locate a _symbol_ in a dependent library is harder to resolve than it is on Windows since there is no indication at all of _which_ shared library was expected to provide the missing symbol.
 
-Like the loader snaps, Linux provides ways to produce debug output from the system loader. The environment variable `LD_DEBUG` can be used to enable various categories of additional debugging output from the loader and `LD_DEBUG_OUTPUT` used to control where this output is written. See &#91;ld.so(8)&#93; for more details.
+Like the loader snaps, Linux provides ways to produce debug output from the system loader. The environment variable `LD_DEBUG` can be used to enable various categories of additional debugging output from the loader and `LD_DEBUG_OUTPUT` used to control where this output is written. See [ld.so(8)](https://man7.org/linux/man-pages/man8/ld.so.8.html) for more details.
 
 ## Conclusion ##
 
@@ -392,20 +392,20 @@ It can be quite hard to diagnose problems with loading DLLs and the well-known s
 
 ## Bibliography ##
 
-- &#91;Debugging Tools For Windows&#93; https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/debugger-download-tools
-- &#91;Decorated names&#93; https://learn.microsoft.com/en-us/cpp/build/reference/decorated-names?view=msvc-170
-- &#91;Dependencies&#93; https://github.com/lucasg/Dependencies
-- &#91;Dependency Walker&#93; https://www.dependencywalker.com/
-- &#91;Developer Support Ticket&#93; https://developercommunity.visualstudio.com/t/GetImageConfigInformation-fails-on-x64-w/10890839
-- &#91;Dynamic-Link Libraries&#93; https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-libraries
-- &#91;Dynamic-link library search order&#93; https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order
-- &#91;File System Redirector&#93; https://learn.microsoft.com/en-us/windows/win32/winprog64/file-system-redirector
-- &#91;Linker support for delay-loading DLLs&#93; https://learn.microsoft.com/en-us/cpp/build/reference/linker-support-for-delay-loaded-dlls?view=msvc-170
-- &#91;PEB structure&#93; https://learn.microsoft.com/en-us/windows/win32/api/winternl/ns-winternl-peb
-- &#91;Simple Debugger&#93; https://github.com/rogerorr/articles/tree/main/Simple_Debugger
-- &#91;Source Code&#93; https://github.com/AccuPublications/overload-listings/tree/feature/DebuggingWindowsDllProblems
-- &#91;Windows API Sets&#93; https://learn.microsoft.com/en-us/windows/win32/apiindex/windows-apisets
-- &#91;ld.so(8)&#93; https://man7.org/linux/man-pages/man8/ld.so.8.html
+- [Debugging Tools For Windows](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/debugger-download-tools)
+- [Decorated names](https://learn.microsoft.com/en-us/cpp/build/reference/decorated-names?view=msvc-170)
+- [Dependencies](https://github.com/lucasg/Dependencies)
+- [Dependency Walker](https://www.dependencywalker.com/)
+- [Developer Support Ticket](https://developercommunity.visualstudio.com/t/GetImageConfigInformation-fails-on-x64-w/10890839)
+- [Dynamic-Link Libraries](https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-libraries)
+- [Dynamic-link library search order](https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order)
+- [File System Redirector](https://learn.microsoft.com/en-us/windows/win32/winprog64/file-system-redirector)
+- [Linker support for delay-loading DLLs](https://learn.microsoft.com/en-us/cpp/build/reference/linker-support-for-delay-loaded-dlls?view=msvc-170)
+- [PEB structure](https://learn.microsoft.com/en-us/windows/win32/api/winternl/ns-winternl-peb)
+- [Simple Debugger](https://github.com/rogerorr/articles/tree/main/Simple_Debugger)
+- [Source Code](https://github.com/AccuPublications/overload-listings/tree/feature/DebuggingWindowsDllProblems)
+- [Windows API Sets](https://learn.microsoft.com/en-us/windows/win32/apiindex/windows-apisets)
+- [ld.so(8)](https://man7.org/linux/man-pages/man8/ld.so.8.html)
 
 --\
 Copyright (c) Roger Orr 2025-05-03 18:23:29Z (First published in Overload 187, Jun 2025)
