@@ -22,3 +22,4 @@ Contains various articles on IT topics, some with associated code.
 - [Showing Variables Using the Windows Debugging API](Debugging_Optimised_Code/Readme.md) - First published in Overload, Oct 2021
 - [Are The Old Ways Sometimes The Best - Part 1](Are_The_Old_Ways_Sometimes_The_Best/AreTheOldWaysSometimesTheBest.md) - First published in CVu, Sep 2023
 - [Are The Old Ways Sometimes The Best - Part 2](Are_The_Old_Ways_Sometimes_The_Best/AreTheOldWaysSometimesTheBest_Part2.md) - First published in CVu, Nov 2023
+- [Debugging Windows Dll Problems](Debugging_Windows_Dll_Problems/DebuggingWindowsDllProblems.md) - First published in Overload, Jul 2025
